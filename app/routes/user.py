@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
 from app.database import get_db
 from app.models import User
-from app.schemas import UserCreate, UserOut, Token,TodoCreate, TodoOut
+from app.schemas import UserCreate, UserOut, Token,TodoCreate, TodoOut ,TodoUpdate
 from app.auth import hash_password, verify_password, create_access_token, get_current_user
 from app.models import Todo, User
 
@@ -66,3 +66,24 @@ def create_todo(todo: TodoCreate, db: Session = Depends(get_db), current_user: U
 def get_todos_by_user(current_user: UserOut = Depends(get_current_user), db: Session = Depends(get_db)):
     todos = db.query(Todo).filter(Todo.user_id == current_user.id).all()
     return todos
+
+
+@router.put("/todos/{todo_id}")
+def update_todo(
+    todo_id: int,
+    todo_update: TodoUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    todo = db.query(Todo).filter(Todo.id == todo_id, Todo.user_id == current_user.id).first()
+    if not todo:
+        raise HTTPException(status_code=404, detail="To-do not found")
+
+    if todo_update.task is not None:
+        todo.task = todo_update.task
+    if todo_update.completed is not None:
+        todo.completed = todo_update.completed
+
+    db.commit()
+    db.refresh(todo)
+    return todo
