@@ -23,3 +23,15 @@ class Token(BaseModel):
 # Model for holding the email extracted from the JWT token payload 
 class TokenData(BaseModel):
     email: str | None = None
+
+#create todo for user
+class TodoCreate(BaseModel):
+    task: str
+    completed: bool = False
+
+class TodoOut(TodoCreate):
+    id: int
+    user_id: int
+
+    class Config:
+        from_attributes = True  # Pydantic v2 replacement for orm_mode
