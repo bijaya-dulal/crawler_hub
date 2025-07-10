@@ -5,11 +5,13 @@ from typing import Optional
 from app.schemas import TokenData
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
-from database import get_db
+from app.database import get_db
 from sqlalchemy.orm import Session
-from models import User
+from app.models import User
+from fastapi.security import OAuth2PasswordBearer
 
-
+# OAuth2 scheme
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login") 
 
 # Password hashing setup
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -47,8 +49,7 @@ def decode_token(token: str):
         return TokenData(email=email)
     except JWTError:
         return None
-
-def get_current_user(token: str = Depends(get_db), db: Session = Depends(get_db)):
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")

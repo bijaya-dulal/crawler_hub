@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr
+from datetime import datetime
 
 # Model for validating user input when creating a new user 
 class UserCreate(BaseModel):
@@ -29,9 +30,11 @@ class TodoCreate(BaseModel):
     task: str
     completed: bool = False
 
-class TodoOut(TodoCreate):
+class TodoOut(BaseModel):
     id: int
-    user_id: int
+    task: str
+    completed: bool
+    created_at: datetime
 
     class Config:
-        from_attributes = True  # Pydantic v2 replacement for orm_mode
+        from_attributes = True  # for Pydantic v2

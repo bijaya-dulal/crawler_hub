@@ -5,8 +5,10 @@ from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
 from app.database import get_db
 from app.models import User
-from app.schemas import UserCreate, UserOut, Token
-from app.auth import hash_password, verify_password, create_access_token
+from app.schemas import UserCreate, UserOut, Token,TodoCreate, TodoOut
+from app.auth import hash_password, verify_password, create_access_token, get_current_user
+from app.models import Todo, User
+
 
 router = APIRouter()
 
@@ -46,3 +48,21 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     
     access_token = create_access_token(data={"sub": user.email})
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.post("/todos", response_model=TodoOut)
+def create_todo(todo: TodoCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    new_todo = Todo(
+        task=todo.task,
+        completed=todo.completed,
+        user_id=current_user.id
+    )
+    db.add(new_todo)
+    db.commit()
+    db.refresh(new_todo)
+    return new_todo
+
+@router.get("/todos", response_model=list[TodoOut])
+def get_todos_by_user(current_user: UserOut = Depends(get_current_user), db: Session = Depends(get_db)):
+    todos = db.query(Todo).filter(Todo.user_id == current_user.id).all()
+    return todos
