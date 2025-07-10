@@ -48,7 +48,7 @@ POST /register – Register a new user
 
 POST /login – Log in and get a JWT access token
 
-POST 
+ ## Todos
 GET	/todos  	     Retrieve paginated list of user's todos
 
 POST	/todos	     Create a new to-do item
