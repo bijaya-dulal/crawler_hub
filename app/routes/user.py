@@ -8,6 +8,7 @@ from app.models import User
 from app.schemas import UserCreate, UserOut, Token,TodoCreate, TodoOut ,TodoUpdate
 from app.auth import hash_password, verify_password, create_access_token, get_current_user
 from app.models import Todo, User
+from fastapi.responses import JSONResponse
 
 
 router = APIRouter()
@@ -49,7 +50,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     access_token = create_access_token(data={"sub": user.email})
     return {"access_token": access_token, "token_type": "bearer"}
 
-
+#add todos 
 @router.post("/todos", response_model=TodoOut)
 def create_todo(todo: TodoCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     new_todo = Todo(
@@ -62,12 +63,14 @@ def create_todo(todo: TodoCreate, db: Session = Depends(get_db), current_user: U
     db.refresh(new_todo)
     return new_todo
 
+
+#fetch todo 
 @router.get("/todos", response_model=list[TodoOut])
 def get_todos_by_user(current_user: UserOut = Depends(get_current_user), db: Session = Depends(get_db)):
     todos = db.query(Todo).filter(Todo.user_id == current_user.id).all()
     return todos
 
-
+#uddate todo 
 @router.put("/todos/{todo_id}")
 def update_todo(
     todo_id: int,
@@ -87,3 +90,13 @@ def update_todo(
     db.commit()
     db.refresh(todo)
     return todo
+#delete todo
+@router.delete("/todos/{id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_todo(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    todo = db.query(Todo).filter(Todo.id == id, Todo.user_id == current_user.id).first()
+    if not todo:
+        raise HTTPException(status_code=404, detail="To-do not found")
+    
+    db.delete(todo)
+    db.commit()
+    return JSONResponse(content={"message": f"Deleted the todo {id}"}, status_code=200)
