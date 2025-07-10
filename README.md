@@ -43,12 +43,16 @@ uvicorn app.main:app --reload
 
 
 # API ENDPOINTS
-## auth
-post /register       register the user
-post /login          login
-## todos
+## Auth
+POST /register – Register a new user
+
+POST /login – Log in and get a JWT access token
+
 POST 
 GET	/todos  	     Retrieve paginated list of user's todos
+
 POST	/todos	     Create a new to-do item
+
 PUT	/todos/{id}	     Update an existing to-do (partial OK)
+
 DELETE	/todos/{id}  Delete a specific to-do
