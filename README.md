@@ -21,6 +21,7 @@ A simple, secure To-Do REST API built with **FastAPI**, **SQLAlchemy**, and **JW
 
 ```bash
 git clone https://github.com/bijaya-dulal/crawler_hub
+cd crawler_hub
 ```  
 
 ### 2. Create and Activate Virtual Environment
